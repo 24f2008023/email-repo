@@ -13,10 +13,6 @@ class Req(BaseModel):
     regions: list
     threshold_ms: float
 
-@app.get("/api/latency")
-def latency_get():
-    return {"status": "ok"}
-
 @app.post("/api/latency")
 def latency(req: Req):
     result = []
