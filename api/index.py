@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import json, os
 
@@ -19,6 +20,17 @@ class LatencyRequest(BaseModel):
     regions: list
     threshold_ms: float
 
+@app.options("/api/latency")
+def options_latency():
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
 @app.post("/api/latency")
 def latency(req: LatencyRequest):
     result = []
@@ -37,4 +49,4 @@ def latency(req: LatencyRequest):
         })
     return result
 
-handler = app
+handler = app 
