@@ -27,6 +27,6 @@ def latency(req: Req):
             "avg_uptime": round(sum(uptimes)/n, 2),
             "breaches": sum(1 for l in latencies if l > req.threshold_ms)
         })
-    return result
+    return {"regions": result}
 
 handler = app
