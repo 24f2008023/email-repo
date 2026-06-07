@@ -1,21 +1,26 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import json, os
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=False)
 
 data_path = os.path.join(os.path.dirname(__file__), '..', 'data.json')
 with open(data_path) as f:
     data = json.load(f)
 
-class Request(BaseModel):
+class LatencyRequest(BaseModel):
     regions: list
     threshold_ms: float
 
+@app.options("/api/latency")
+def options():
+    return JSONResponse(content={}, headers={"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST", "Access-Control-Allow-Headers": "*"})
+
 @app.post("/api/latency")
-def latency(req: Request):
+def latency(req: LatencyRequest):
     result = []
     for region in req.regions:
         rows = [r for r in data if r["region"] == region]
@@ -28,4 +33,4 @@ def latency(req: Request):
             "avg_uptime": round(sum(uptimes)/len(uptimes), 2),
             "breaches": sum(1 for l in latencies if l > req.threshold_ms)
         })
-    return result
+    return JSONResponse(content=result, headers={"Access-Control-Allow-Origin": "*"})
