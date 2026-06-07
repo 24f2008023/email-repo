@@ -4,8 +4,7 @@ from pydantic import BaseModel
 import json, os
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], expose_headers=["*"])
 with open(os.path.join(os.path.dirname(__file__), '..', 'q-vercel-latency.json')) as f:
      data = json.load(f)
 
