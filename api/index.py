@@ -1,17 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import json, os
 
 app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 with open(os.path.join(os.path.dirname(__file__), '..', 'data.json')) as f:
     data = json.load(f)
@@ -19,17 +12,6 @@ with open(os.path.join(os.path.dirname(__file__), '..', 'data.json')) as f:
 class LatencyRequest(BaseModel):
     regions: list
     threshold_ms: float
-
-@app.options("/api/latency")
-def options_latency():
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "*",
-        }
-    )
 
 @app.post("/api/latency")
 def latency(req: LatencyRequest):
@@ -39,14 +21,14 @@ def latency(req: LatencyRequest):
         latencies = sorted([r["latency_ms"] for r in rows])
         uptimes = [r["uptime_pct"] for r in rows]
         n = len(latencies)
-        p95_index = int(round(0.95 * n)) - 1
+        p95_index = int(len(latencies) * 95 // 100)
         result.append({
             "region": region,
             "avg_latency": round(sum(latencies)/n, 2),
             "p95_latency": round(latencies[p95_index], 2),
-            "avg_uptime": round(sum(uptimes)/len(uptimes), 2),
+            "avg_uptime": round(sum(uptimes)/n, 2),
             "breaches": sum(1 for l in latencies if l > req.threshold_ms)
         })
     return result
 
-handler = app 
+handler = app
