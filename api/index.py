@@ -6,8 +6,8 @@ import json, os
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-with open(os.path.join(os.path.dirname(__file__), '..', 'data.json')) as f:
-    data = json.load(f)
+with open(os.path.join(os.path.dirname(__file__), '..', 'q-vercel-latency.json')) as f:
+     data = json.load(f)
 
 class Req(BaseModel):
     regions: list
