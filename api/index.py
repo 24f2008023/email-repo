@@ -23,7 +23,7 @@ def latency(req: Req):
         result.append({
             "region": region,
             "avg_latency": round(sum(latencies)/n, 2),
-            "p95_latency": round(latencies[int(n*0.95)], 2),
+            "p95_latency": round(sorted(latencies)[int(len(latencies)*0.95) - 1], 2),
             "avg_uptime": round(sum(uptimes)/n, 2),
             "breaches": sum(1 for l in latencies if l > req.threshold_ms)
         })
