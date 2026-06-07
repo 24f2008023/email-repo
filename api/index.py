@@ -24,12 +24,14 @@ def latency(req: LatencyRequest):
     result = []
     for region in req.regions:
         rows = [r for r in data if r["region"] == region]
-        latencies = [r["latency_ms"] for r in rows]
+        latencies = sorted([r["latency_ms"] for r in rows])
         uptimes = [r["uptime_pct"] for r in rows]
+        n = len(latencies)
+        p95_index = int(round(0.95 * n)) - 1
         result.append({
             "region": region,
-            "avg_latency": round(sum(latencies)/len(latencies), 2),
-            "p95_latency": round(sorted(latencies)[int(len(latencies)*0.95)], 2),
+            "avg_latency": round(sum(latencies)/n, 2),
+            "p95_latency": round(latencies[p95_index], 2),
             "avg_uptime": round(sum(uptimes)/len(uptimes), 2),
             "breaches": sum(1 for l in latencies if l > req.threshold_ms)
         })
